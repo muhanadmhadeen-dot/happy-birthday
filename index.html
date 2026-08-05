@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎂 عيد ميلاد سعيد!</title>
+  <meta name="description" content="شاركنا فرحتك واكتب أمنية عيد ميلاد" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Cairo', sans-serif;
+      min-height: 100vh; background: #0f0a1a; color: #fff;
+      overflow-x: hidden; display: flex; flex-direction: column;
+    }
+    .bg-fixed {
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse at 20% 50%, rgba(236,72,153,0.2) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(245,158,11,0.2) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 80%, rgba(168,85,247,0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 60% 30%, rgba(251,191,36,0.1) 0%, transparent 40%),
+        linear-gradient(180deg, #1a0a2e 0%, #16082a 30%, #0f0a1a 100%);
+    }
+    .bg-pattern {
+      position: fixed; inset: 0; z-index: 0;
+      background-image:
+        radial-gradient(rgba(255,215,0,0.04) 1px, transparent 1px),
+        radial-gradient(rgba(244,114,182,0.03) 1px, transparent 1px);
+      background-size: 40px 40px, 60px 60px;
+      background-position: 0 0, 30px 30px;
+    }
+    .particle {
+      position: fixed; pointer-events: none; z-index: 2;
+      animation: floatUp var(--dur) ease-in-out var(--delay) infinite;
+      opacity: 0.15; font-size: var(--size);
+      left: var(--left); bottom: -40px;
+    }
+    @keyframes floatUp {
+      0%   { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
+      10%  { opacity: 0.15; }
+      50%  { transform: translateY(-50vh) translateX(20px) scale(1.15); opacity: 0.15; }
+      90%  { opacity: 0.1; }
+      100% { transform: translateY(-105vh) translateX(-15px) scale(0.7); opacity: 0; }
+    }
+    .main-wrap { position: relative; z-index: 10; flex: 1; display: flex; flex-direction: column; }
+    .hero { text-align: center; padding: 3rem 1rem 2rem; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: rgba(255,255,255,0.15); backdrop-filter: blur(12px);
+      padding: 0.4rem 1rem; border-radius: 9999px;
+      border: 1px solid rgba(255,255,255,0.2);
+      margin-bottom: 1.5rem; font-size: 0.85rem; color: rgba(255,255,255,0.9); font-weight: 600;
+    }
+    .sparkle { display: inline-block; color: #fbbf24; }
+    .hero h1 {
+      font-size: 3rem; font-weight: 900; line-height: 1.3; color: #fff; margin-bottom: 0.75rem;
+    }
+    .hero h1 .bounce { display: inline-block; animation: bounce2 2s ease-in-out infinite; }
+    .hero h1 .bounce2 { animation-delay: 0.5s; }
+    @keyframes bounce2 { 0%,100%{ transform:translateY(0) } 50%{ transform:translateY(-10px) } }
+    .subtitle { color: rgba(255,255,255,0.8); font-size: 1.15rem; margin-bottom: 0.25rem; }
+    .sub-subtitle { color: rgba(255,255,255,0.6); font-size: 1rem; }
+    .hero-icons {
+      display: flex; align-items: center; justify-content: center;
+      gap: 0.75rem; margin-top: 1.5rem; flex-wrap: wrap;
+    }
+    .hero-icon {
+      width: 46px; height: 46px; border-radius: 50%;
+      background: rgba(255,255,255,0.1); backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.2);
+      display: flex; align-items: center; justify-content: center;
+      animation: pulse 3s ease-in-out infinite;
+    }
+    .hero-icon:nth-child(2){animation-delay:.3s}.hero-icon:nth-child(3){animation-delay:.6s}
+    .hero-icon:nth-child(4){animation-delay:.9s}.hero-icon:nth-child(5){animation-delay:1.2s}
+    .hero-icon:nth-child(6){animation-delay:1.5s}
+    .hero-icon svg { width: 22px; height: 22px; fill: #fbbf24; }
+    @keyframes pulse { 0%,100%{ transform:scale(1) } 50%{ transform:scale(1.1) } }
+
+    .form-section { padding: 0 1rem 2rem; max-width: 480px; margin: 0 auto; width: 100%; }
+    .glass-card {
+      background: rgba(255,255,255,0.1); backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.2); border-radius: 1.25rem;
+      padding: 1.5rem; box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+    .form-header { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.25rem; }
+    .form-header-icon {
+      width: 32px; height: 32px; border-radius: 0.5rem;
+      background: linear-gradient(135deg, #f43f5e, #f59e0b);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .form-header-icon svg { width: 16px; height: 16px; fill: white; }
+    .form-header h2 { font-size: 1.1rem; font-weight: 700; }
+
+    label { display: block; color: rgba(255,255,255,0.7); font-size: 0.85rem; font-weight: 600; margin-bottom: 0.4rem; }
+    .field { margin-bottom: 1rem; }
+    input[type="text"], textarea {
+      width: 100%; padding: 0.7rem 0.9rem; border-radius: 0.75rem;
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+      color: white; font-family: 'Cairo', sans-serif; font-size: 0.95rem;
+      outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.4); }
+    input:focus, textarea:focus {
+      border-color: rgba(251,191,36,0.5); box-shadow: 0 0 0 3px rgba(251,191,36,0.2);
+    }
+    textarea { min-height: 100px; resize: none; line-height: 1.6; }
+    .char-count { text-align: left; font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-top: 0.25rem; }
+
+    .emoji-grid { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .emoji-btn {
+      width: 40px; height: 40px; border-radius: 0.65rem;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; cursor: pointer; transition: all 0.2s;
+    }
+    .emoji-btn:hover { background: rgba(255,255,255,0.15); transform: scale(1.08); }
+    .emoji-btn.active {
+      background: rgba(251,191,36,0.3); border-color: #fbbf24;
+      transform: scale(1.12); box-shadow: 0 0 12px rgba(251,191,36,0.2);
+    }
+
+    .submit-btn {
+      width: 100%; padding: 0.8rem; border: none; border-radius: 0.75rem;
+      background: linear-gradient(135deg, #f43f5e, #ec4899, #f59e0b);
+      background-size: 200% 200%; color: white;
+      font-family: 'Cairo', sans-serif; font-size: 1rem; font-weight: 700;
+      cursor: pointer; transition: all 0.3s;
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+      margin-top: 0.5rem; animation: btnGrad 3s ease infinite;
+    }
+    @keyframes btnGrad { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
+    .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(244,63,94,0.3); }
+    .submit-btn:active { transform: scale(0.98); }
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+    .submit-btn svg { width: 18px; height: 18px; fill: white; }
+    .spinner {
+      width: 20px; height: 20px; border: 2.5px solid rgba(255,255,255,0.3);
+      border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .wishes-section { flex: 1; padding: 0 1rem 3rem; max-width: 900px; margin: 0 auto; width: 100%; }
+    .wishes-divider {
+      display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 1.5rem;
+    }
+    .divider-line { flex: 1; height: 1px; background: linear-gradient(to var(--d), rgba(255,255,255,0.3), transparent); }
+    .divider-line:first-child { --d: left; }
+    .divider-line:last-child { --d: right; }
+    .wishes-badge {
+      display: flex; align-items: center; gap: 0.4rem;
+      background: rgba(255,255,255,0.1); backdrop-filter: blur(8px);
+      padding: 0.35rem 0.9rem; border-radius: 9999px;
+      border: 1px solid rgba(255,255,255,0.15);
+      font-size: 0.85rem; color: rgba(255,255,255,0.9); font-weight: 600;
+    }
+    .wishes-badge svg { width: 14px; height: 14px; fill: #f43f5e; }
+
+    .wish-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+    @media(min-width:640px){ .wish-grid { grid-template-columns: repeat(2,1fr); } }
+    @media(min-width:768px){ .wish-grid { grid-template-columns: repeat(3,1fr); } }
+
+    .wish-card {
+      border-radius: 1rem; padding: 1rem; border: 1px solid;
+      transition: all 0.3s; animation: cardIn 0.5s ease-out forwards; opacity: 0;
+    }
+    .wish-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.15); }
+    @keyframes cardIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+    .wish-card.g1 { background:linear-gradient(135deg,rgba(254,205,211,0.9),rgba(255,237,213,0.9)); border-color:rgba(254,205,211,0.6); }
+    .wish-card.g2 { background:linear-gradient(135deg,rgba(233,213,255,0.9),rgba(252,231,243,0.9)); border-color:rgba(233,213,255,0.6); }
+    .wish-card.g3 { background:linear-gradient(135deg,rgba(255,237,213,0.9),rgba(254,215,170,0.9)); border-color:rgba(255,237,213,0.6); }
+    .wish-card.g4 { background:linear-gradient(135deg,rgba(252,231,243,0.9),rgba(250,204,255,0.9)); border-color:rgba(252,231,243,0.6); }
+    .wish-card.g5 { background:linear-gradient(135deg,rgba(254,215,170,0.9),rgba(254,240,138,0.9)); border-color:rgba(254,215,170,0.6); }
+    .wish-card.g6 { background:linear-gradient(135deg,rgba(250,204,255,0.9),rgba(254,205,211,0.9)); border-color:rgba(250,204,255,0.6); }
+
+    .wish-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 0.65rem; }
+    .wish-info { display: flex; align-items: center; gap: 0.6rem; }
+    .wish-avatar {
+      width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, #f43f5e, #f59e0b);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.85rem; color: white;
+      box-shadow: 0 2px 8px rgba(244,63,94,0.3);
+    }
+    .wish-name { font-weight: 700; font-size: 0.85rem; color: #1f2937; }
+    .wish-time { font-size: 0.7rem; color: #9ca3af; margin-top: 0.1rem; }
+    .wish-emoji { font-size: 1.6rem; transition: transform 0.3s; }
+    .wish-card:hover .wish-emoji { animation: bounceE 0.5s ease; }
+    @keyframes bounceE { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+    .wish-msg { font-size: 0.88rem; line-height: 1.65; color: #374151; white-space: pre-wrap; }
+    .wish-footer {
+      display: flex; align-items: center; gap: 0.2rem;
+      margin-top: 0.65rem; padding-top: 0.6rem; border-top: 1px solid rgba(0,0,0,0.08);
+    }
+    .wish-footer svg { width: 12px; height: 12px; }
+    .wish-footer svg:nth-child(1) { fill: #f43f5e; }
+    .wish-footer svg:nth-child(2) { fill: #fb7185; }
+    .wish-footer svg:nth-child(3) { fill: #fda4af; }
+
+    .empty-state { text-align: center; padding: 4rem 1rem; }
+    .empty-icon {
+      width: 72px; height: 72px; border-radius: 50%; margin: 0 auto 1rem;
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .empty-icon svg { width: 36px; height: 36px; fill: rgba(255,255,255,0.25); }
+    .empty-state .t1 { font-size: 1.1rem; color: rgba(255,255,255,0.5); font-weight: 600; margin-bottom: 0.25rem; }
+    .empty-state .t2 { font-size: 0.88rem; color: rgba(255,255,255,0.25); }
+    .loading-state { text-align: center; padding: 3rem 1rem; }
+    .loading-spinner {
+      width: 44px; height: 44px; margin: 0 auto 0.75rem;
+      border: 3px solid rgba(255,255,255,0.1); border-top-color: #fbbf24;
+      border-radius: 50%; animation: spin 0.8s linear infinite;
+    }
+    .loading-state p { font-size: 0.88rem; color: rgba(255,255,255,0.4); }
+
+    .toast-wrap { position:fixed;top:1.5rem;left:50%;transform:translateX(-50%);z-index:1000;display:flex;flex-direction:column;gap:0.5rem;pointer-events:none; }
+    .toast {
+      padding:0.7rem 1.2rem;border-radius:0.75rem;backdrop-filter:blur(16px);
+      font-size:0.9rem;font-weight:600;pointer-events:auto;white-space:nowrap;
+      animation: toastIn 0.3s ease-out, toastOut 0.3s ease-in 2.7s forwards;
+    }
+    .toast.success { background:rgba(52,211,153,0.2);border:1px solid rgba(52,211,153,0.3);color:#6ee7b7; }
+    .toast.error { background:rgba(248,113,113,0.2);border:1px solid rgba(248,113,113,0.3);color:#fca5a5; }
+    @keyframes toastIn { from{opacity:0;transform:translateY(-20px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes toastOut { from{opacity:1} to{opacity:0;transform:translateY(-10px)} }
+
+    .confetti-wrap { position:fixed;inset:0;pointer-events:none;z-index:999;overflow:hidden; }
+    .confetti-p { position:absolute;top:0;opacity:0;animation:confFall var(--dur) ease-out var(--delay) forwards; }
+    @keyframes confFall { 0%{transform:translateY(-10px) rotate(0);opacity:1} 100%{transform:translateY(100vh) rotate(720deg);opacity:0} }
+
+    footer { position:relative;z-index:10;text-align:center;padding:1rem;border-top:1px solid rgba(255,255,255,0.1); }
+    footer p { font-size:0.75rem;color:rgba(255,255,255,0.4); }
+    ::-webkit-scrollbar{width:6px} ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:3px}
+    @media(max-width:640px){ .hero h1{font-size:2.2rem} .hero{padding:2rem 1rem 1.5rem} .glass-card{padding:1.25rem} }
+  </style>
+</head>
+<body>
+  <div class="bg-fixed"></div>
+  <div class="bg-pattern"></div>
+  <div id="particles"></div>
+  <div class="toast-wrap" id="toastWrap"></div>
+  <div class="confetti-wrap" id="confettiWrap"></div>
+
+  <div class="main-wrap">
+    <main>
+      <header class="hero">
+        <div class="hero-badge">
+          <span class="sparkle">✨</span> مناسبة خاصة <span class="sparkle">✨</span>
+        </div>
+        <h1>
+          <span class="bounce">🎂</span> عيد ميلاد سعيد <span class="bounce bounce2">🎂</span>
+        </h1>
+        <p class="subtitle">كل عام وأنت بألف خير</p>
+        <p class="sub-subtitle">اكتب تهنئتك وشاركنا الفرحة</p>
+        <div class="hero-icons">
+          <div class="hero-icon"><svg viewBox="0 0 24 24"><path d="M12 6C13.11 6 14 5.11 14 4C14 2.89 13.11 2 12 2S10 2.89 10 4C10 5.11 10.89 6 12 6M17 14C16.5 13.23 15.67 12.71 14.73 12.55C15.5 11.93 16 11 16 10C16 8.34 14.66 7 13 7H11C9.34 7 8 8.34 8 10C8 11 8.5 11.93 9.27 12.55C8.33 12.71 7.5 13.23 7 14H17M12 22C10.34 22 9 20.66 9 19C9 17.79 9.68 16.75 10.67 16.21L12 18L13.33 16.21C14.32 16.75 15 17.79 15 19C15 20.66 13.66 22 12 22Z"/></svg></div>
+          <div class="hero-icon"><svg viewBox="0 0 24 24"><path d="M20 6H12L10 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V8C22 6.9 21.1 6 20 6Z"/></svg></div>
+          <div class="hero-icon"><svg viewBox="0 0 24 24"><path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.28 2 8.5C2 5.42 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.42 22 8.5C22 12.28 18.6 15.36 13.45 20.04L12 21.35Z"/></svg></div>
+          <div class="hero-icon"><svg viewBox="0 0 24 24"><path d="M12 6C13.11 6 14 5.11 14 4C14 2.89 13.11 2 12 2S10 2.89 10 4C10 5.11 10.89 6 12 6M17 14C16.5 13.23 15.67 12.71 14.73 12.55C15.5 11.93 16 11 16 10C16 8.34 14.66 7 13 7H11C9.34 7 8 8.34 8 10C8 11 8.5 11.93 9.27 12.55C8.33 12.71 7.5 13.23 7 14H17M12 22C10.34 22 9 20.66 9 19C9 17.79 9.68 16.75 10.67 16.21L12 18L13.33 16.21C14.32 16.75 15 17.79 15 19C15 20.66 13.66 22 12 22Z"/></svg></div>
+          <div class="hero-icon"><svg viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg></div>
+          <div class="hero-icon"><svg viewBox="0 0 24 24"><path d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2M20 16H6L4 18V4H20V16Z"/></svg></div>
+        </div>
+      </header>
+
+      <section class="form-section">
+        <div class="glass-card">
+          <div class="form-header">
+            <div class="form-header-icon">
+              <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10L17 12 2 14 2.01 21Z"/></svg>
+            </div>
+            <h2>اكتب تهنئتك</h2>
+          </div>
+          <form id="wishForm">
+            <div class="field">
+              <label for="nameInput">اسمك</label>
+              <input type="text" id="nameInput" placeholder="اكتب اسمك هنا..." maxlength="50" autocomplete="off" />
+            </div>
+            <div class="field">
+              <label for="msgInput">التهنئة</label>
+              <textarea id="msgInput" placeholder="اكتب تهنئتك هنا... 💝" maxlength="500"></textarea>
+              <div class="char-count"><span id="charCount">0</span>/500</div>
+            </div>
+            <div class="field">
+              <label>اختر رمز تعبيري</label>
+              <div class="emoji-grid" id="emojiGrid"></div>
+            </div>
+            <button type="submit" class="submit-btn" id="submitBtn">
+              <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10L17 12 2 14 2.01 21Z"/></svg>
+              <span>أرسل التهنئة</span>
+              <span id="btnEmoji">🎉</span>
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <section class="wishes-section">
+        <div class="wishes-divider">
+          <div class="divider-line"></div>
+          <div class="wishes-badge">
+            <svg viewBox="0 0 24 24"><path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.28 2 8.5C2 5.42 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.42 22 8.5C22 12.28 18.6 15.36 13.45 20.04L12 21.35Z"/></svg>
+            التهاني (<span id="wishCount">0</span>)
+            <svg viewBox="0 0 24 24"><path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.28 2 8.5C2 5.42 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.42 22 8.5C22 12.28 18.6 15.36 13.45 20.04L12 21.35Z"/></svg>
+          </div>
+          <div class="divider-line"></div>
+        </div>
+        <div id="wishesContainer">
+          <div class="loading-state" id="loadingState">
+            <div class="loading-spinner"></div>
+            <p>جاري تحميل التهاني...</p>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer><p>صُنع بكل حب ❤️ | عيد ميلاد سعيد</p></footer>
+  </div>
+
+  <script>
+    // ==============================================
+    // 📌 خطوات إعداد Firebase (مجاني تماماً):
+    //
+    // 1. روح على https://console.firebase.google.com
+    // 2. اضغط "إنشاء مشروع" (Add Project)
+    // 3. من القائمة الجانبية اختار Realtime Database
+    // 4. اضغط "إنشاء قاعدة بيانات" واختر المنطقة الأقرب لك
+    // 5. اختر "وضع الاختبار" (Test Mode)
+    // 6. من ⚙️ إعدادات المشروع -> عام -> تطبيقاتك
+    //    -> اضغط على أيقونة الويب </> -> سجّل التطبيق
+    // 7. انسخ الـ config اللي يظهرلك وحطّه هنا ↓
+    // ==============================================
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+      projectId: "YOUR_PROJECT",
+      storageBucket: "YOUR_PROJECT.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+    const isReady = firebaseConfig.apiKey !== "YOUR_API_KEY";
+    let db = null;
+    if (isReady) { firebase.initializeApp(firebaseConfig); db = firebase.database(); }
+  </script>
+
+  <script>
+    const EMOJIS = ['🎉','🎂','🎈','🎁','❤️','🌟','🥳','🎊','✨','💕','🌸','🔥','👑','💎','🦋','🕊️'];
+    const GRADS = ['g1','g2','g3','g4','g5','g6'];
+    let selEmoji = '🎉';
+
+    !function(){const c=document.getElementById('particles');['✨','🌟','💫','⭐','🎈','🎊','🎂','🎁'].forEach((e,i)=>{const d=document.createElement('div');d.className='particle';d.textContent=e;d.style.setProperty('--left',5+i*12+'%');d.style.setProperty('--delay',i*1.5+'s');d.style.setProperty('--dur',8+Math.random()*6+'s');d.style.setProperty('--size',16+(i%3)*8+'px');c.appendChild(d)})}();
+
+    !function(){const g=document.getElementById('emojiGrid');EMOJIS.forEach(e=>{const b=document.createElement('button');b.type='button';b.className='emoji-btn'+(e===selEmoji?' active':'');b.textContent=e;b.onclick=()=>{g.querySelectorAll('.emoji-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');selEmoji=e;document.getElementById('btnEmoji').textContent=e};g.appendChild(b)})}();
+
+    document.getElementById('msgInput').addEventListener('input',function(){document.getElementById('charCount').textContent=this.value.length});
+
+    function toast(m,t='success'){const c=document.getElementById('toastWrap'),d=document.createElement('div');d.className='toast '+t;d.textContent=m;c.appendChild(d);setTimeout(()=>d.remove(),3000)}
+
+    function fireConfetti(){const c=document.getElementById('confettiWrap'),cols=['#FFD700','#FF6B9D','#C084FC','#FB923C','#34D399','#F472B6','#A78BFA','#FBBF24','#F87171','#60A5FA'];for(let i=0;i<60;i++){const p=document.createElement('div');p.className='confetti-p';const s=Math.random()*8+4,r=Math.random()*360;p.style.cssText='left:'+Math.random()*100+'%;width:'+s+'px;height:'+(s*1.4)+'px;background:'+cols[i%cols.length]+';border-radius:2px;transform:rotate('+r+'deg);--delay:'+Math.random()*2+'s;--dur:'+(Math.random()*2+3)+'s';c.appendChild(p);setTimeout(()=>p.remove(),6000)}}
+
+    function fmtDate(ts){const d=Date.now()-ts,m=Math.floor(d/6e4),h=Math.floor(d/36e5),dy=Math.floor(d/864e5);if(m<1)return'الآن';if(m<60)return'منذ '+m+' دقيقة';if(h<24)return'منذ '+h+' ساعة';if(dy<7)return'منذ '+dy+' يوم';return new Date(ts).toLocaleDateString('ar-EG',{year:'numeric',month:'long',day:'numeric'})}
+
+    function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+
+    const HEART='<svg viewBox="0 0 24 24"><path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.28 2 8.5C2 5.42 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.42 22 8.5C22 12.28 18.6 15.36 13.45 20.04L12 21.35Z"/></svg>';
+    function render(data){
+      const c=document.getElementById('wishesContainer');
+      const entries=Object.entries(data||{}).sort((a,b)=>b[1].createdAt-a[1].createdAt);
+      document.getElementById('wishCount').textContent=entries.length;
+      if(!entries.length){c.innerHTML='<div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24"><path d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2M20 16H6L4 18V4H20V16Z"/></svg></div><p class="t1">لا توجد تهاني بعد</p><p class="t2">كن أول من يهنئ صاحب العيد! 🎂</p></div>';return}
+      const g=document.createElement('div');g.className='wish-grid';
+      entries.forEach(([id,w],i)=>{const card=document.createElement('div');card.className='wish-card '+GRADS[i%GRADS.length];card.style.animationDelay=Math.min(i*0.08,0.8)+'s';card.innerHTML='<div class="wish-header"><div class="wish-info"><div class="wish-avatar">'+esc(w.name.charAt(0)).toUpperCase()+'</div><div><div class="wish-name">'+esc(w.name)+'</div><div class="wish-time">'+fmtDate(w.createdAt)+'</div></div></div><div class="wish-emoji">'+esc(w.emoji)+'</div></div><div class="wish-msg">'+esc(w.message)+'</div><div class="wish-footer">'+HEART+HEART+HEART+'</div>';g.appendChild(card)});
+      c.innerHTML='';c.appendChild(g)
+    }
+
+    document.getElementById('wishForm').addEventListener('submit',async function(e){
+      e.preventDefault();
+      const name=document.getElementById('nameInput').value.trim(),msg=document.getElementById('msgInput').value.trim();
+      if(!name||!msg){toast('الرجاء كتابة الاسم والرسالة','error');return}
+      if(!isReady){toast('⚠️ Firebase مش متصل','error');return}
+      const btn=document.getElementById('submitBtn');btn.disabled=true;btn.innerHTML='<div class="spinner"></div><span>جاري الإرسال...</span>';
+      try{
+        await db.ref('wishes').push().set({name,message:msg,emoji:selEmoji,createdAt:firebase.database.ServerValue.TIMESTAMP});
+        document.getElementById('nameInput').value='';document.getElementById('msgInput').value='';document.getElementById('charCount').textContent='0';
+        selEmoji='🎉';document.getElementById('btnEmoji').textContent='🎉';
+        document.querySelectorAll('.emoji-btn').forEach(b=>b.classList.remove('active'));document.querySelector('.emoji-btn').classList.add('active');
+        fireConfetti();toast('تم بنجاح! 🎉 شكراً لتهنئتك')
+      }catch(err){toast('حدث خطأ - حاول مرة أخرى','error')
+      }finally{btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:white"><path d="M2.01 21L23 12 2.01 3 2 10L17 12 2 14 2.01 21Z"/></svg><span>أرسل التهنئة</span><span id="btnEmoji">🎉</span>'}
+    });
+
+    if(isReady){db.ref('wishes').on('value',s=>render(s.val()))}
+    else{document.getElementById('wishesContainer').innerHTML='<div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12S6.48 22 12 22S22 17.52 22 12S17.52 2 12 2M11 7H13V14H11V7M11 16H13V18H11V16Z"/></svg></div><p class="t1">Firebase مش متصل بعد</p><p class="t2" style="max-width:360px;margin:0.5rem auto 0;line-height:1.7">عشان التهاني تظهر لكل الناس من أي جهاز، تحتاج تربط الملف بـ Firebase (مجاني).<br/>افتح الملف وابحث عن <strong style="color:rgba(255,255,255,0.7)">firebaseConfig</strong> واستبدل البيانات.</p></div>'}
+  </script>
+</body>
+</html>
