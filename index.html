@@ -324,18 +324,29 @@
   </div>
 
   <script>
-    // ==============================================
-    // 📌 خطوات إعداد Firebase (مجاني تماماً):
-    //
-    // 1. روح على https://console.firebase.google.com
-    // 2. اضغط "إنشاء مشروع" (Add Project)
-    // 3. من القائمة الجانبية اختار Realtime Database
-    // 4. اضغط "إنشاء قاعدة بيانات" واختر المنطقة الأقرب لك
-    // 5. اختر "وضع الاختبار" (Test Mode)
-    // 6. من ⚙️ إعدادات المشروع -> عام -> تطبيقاتك
-    //    -> اضغط على أيقونة الويب </> -> سجّل التطبيق
-    // 7. انسخ الـ config اللي يظهرلك وحطّه هنا ↓
-    // ==============================================
+   <script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyDCaYFi5A5zchghYaKAhfp3otoJQZ65lbk",
+    authDomain: "happy-birthday-c8563.firebaseapp.com",
+    projectId: "happy-birthday-c8563",
+    storageBucket: "happy-birthday-c8563.firebasestorage.app",
+    messagingSenderId: "401222438403",
+    appId: "1:401222438403:web:eb7e7c2aa2383f97524836",
+    measurementId: "G-RVRXPP9C5S"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
     const firebaseConfig = {
       apiKey: "YOUR_API_KEY",
       authDomain: "YOUR_PROJECT.firebaseapp.com",
